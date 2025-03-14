@@ -6,19 +6,20 @@ resource "aws_instance" "web_1" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install -y nginx
-              cat <<EOT > /var/www/html/index.html
-              <html>
+              sudo yum update -y
+              sudo amazon-linux-extras enable nginx1
+              sudo yum install -y nginx
+
+              echo '<html>
               <head><title>Home</title></head>
-              <body style="background-color:lightblue;">
-              <h1>Hello bala your home page is ready</h1>
+              <body>
+              <h1>Hello Bala, your Home page is ready</h1>
               </body>
-              </html>
-              EOT
-              systemctl start nginx
-              systemctl enable nginx
-              EOF
+              </html>' | sudo tee /usr/share/nginx/html/index.html > /dev/null
+
+              sudo systemctl restart nginx
+              sudo systemctl enable nginx
+EOF
 
   tags = { Name = "WebServer-Home" }
 }
@@ -31,20 +32,33 @@ resource "aws_instance" "web_2" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install -y nginx
-              mkdir -p /var/www/html/images
-              cat <<EOT > /var/www/html/images/index.html
-              <html>
+              sudo yum update -y
+              sudo amazon-linux-extras enable nginx1
+              sudo yum install -y nginx
+              
+              sudo mkdir -p /usr/share/nginx/html/images
+
+              echo '<html>
               <head><title>Images</title></head>
-              <body style="background-color:lightgreen;">
-              <h1>Hello bala your Image page is ready</h1>
+              <body>
+              <h1>Hello Bala, your Images page is ready</h1>
               </body>
-              </html>
+              </html>' | sudo tee /usr/share/nginx/html/images/index.html > /dev/null
+
+              # Configure Nginx for /images
+              sudo tee /etc/nginx/conf.d/images.conf > /dev/null <<EOT
+              server {
+                  listen 80;
+                  location /images {
+                      root /usr/share/nginx/html;
+                      index index.html;
+                  }
+              }
               EOT
-              systemctl start nginx
-              systemctl enable nginx
-              EOF
+
+              sudo systemctl restart nginx
+              sudo systemctl enable nginx
+EOF
 
   tags = { Name = "WebServer-Images" }
 }
@@ -57,20 +71,33 @@ resource "aws_instance" "web_3" {
 
   user_data = <<-EOF
               #!/bin/bash
-              apt update -y
-              apt install -y nginx
-              mkdir -p /var/www/html/register
-              cat <<EOT > /var/www/html/register/index.html
-              <html>
+              sudo yum update -y
+              sudo amazon-linux-extras enable nginx1
+              sudo yum install -y nginx
+              
+              sudo mkdir -p /usr/share/nginx/html/register
+
+              echo '<html>
               <head><title>Register</title></head>
-              <body style="background-color:lightcoral;">
-              <h1>Hello bala your Register Page is ready</h1>
+              <body>
+              <h1>Hello Bala, your Register page is ready</h1>
               </body>
-              </html>
+              </html>' | sudo tee /usr/share/nginx/html/register/index.html > /dev/null
+
+              # Configure Nginx for /register
+              sudo tee /etc/nginx/conf.d/register.conf > /dev/null <<EOT
+              server {
+                  listen 80;
+                  location /register {
+                      root /usr/share/nginx/html;
+                      index index.html;
+                  }
+              }
               EOT
-              systemctl start nginx
-              systemctl enable nginx
-              EOF
+
+              sudo systemctl restart nginx
+              sudo systemctl enable nginx
+EOF
 
   tags = { Name = "WebServer-Register" }
 }

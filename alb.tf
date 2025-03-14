@@ -14,12 +14,21 @@ resource "aws_lb" "web_alb" {
   tags = { Name = "Web-ALB" }
 }
 
-# Target Groups
+# Target Groups with Health Checks
 resource "aws_lb_target_group" "tg_home" {
   name     = "tg-home"
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main_vpc.id
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
 }
 
 resource "aws_lb_target_group" "tg_images" {
@@ -27,13 +36,31 @@ resource "aws_lb_target_group" "tg_images" {
   port     = 80
   protocol = "HTTP"
   vpc_id   = aws_vpc.main_vpc.id
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
 }
 
 resource "aws_lb_target_group" "tg_register" {
   name     = "tg-register"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.main_vpc.id # Fixed reference here
+  vpc_id   = aws_vpc.main_vpc.id
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    matcher             = "200"
+  }
 }
 
 # Attach EC2 instances to Target Groups
@@ -94,7 +121,7 @@ resource "aws_lb_listener_rule" "images_rule" {
 
   condition {
     path_pattern {
-      values = ["/images"]
+      values = ["/images*"]  # Correct format for subpath routing
     }
   }
 
@@ -110,7 +137,7 @@ resource "aws_lb_listener_rule" "register_rule" {
 
   condition {
     path_pattern {
-      values = ["/register"]
+      values = ["/register*"]  # Correct format for subpath routing
     }
   }
 
